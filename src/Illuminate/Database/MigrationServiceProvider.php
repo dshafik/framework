@@ -143,7 +143,7 @@ class MigrationServiceProvider extends ServiceProvider implements DeferrableProv
     protected function registerMigrateInstallCommand()
     {
         $this->app->singleton(InstallCommand::class, function ($app) {
-            return new InstallCommand($app['migration.repository']);
+            return new InstallCommand($app['migration.repository'], $app[Dispatcher::class]);
         });
     }
 

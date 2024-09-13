@@ -3,6 +3,8 @@
 namespace Illuminate\Database\Console\Migrations;
 
 use Illuminate\Console\Command;
+use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Database\Events\MigrationsInstalling;
 use Illuminate\Database\Migrations\MigrationRepositoryInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputOption;
@@ -30,6 +32,7 @@ class InstallCommand extends Command
      * @var \Illuminate\Database\Migrations\MigrationRepositoryInterface
      */
     protected $repository;
+    protected $dispatcher;
 
     /**
      * Create a new migration install command instance.
@@ -37,11 +40,12 @@ class InstallCommand extends Command
      * @param  \Illuminate\Database\Migrations\MigrationRepositoryInterface  $repository
      * @return void
      */
-    public function __construct(MigrationRepositoryInterface $repository)
+    public function __construct(MigrationRepositoryInterface $repository, Dispatcher $dispatcher)
     {
         parent::__construct();
 
         $this->repository = $repository;
+        $this->dispatcher = $dispatcher;
     }
 
     /**
@@ -52,6 +56,8 @@ class InstallCommand extends Command
     public function handle()
     {
         $this->repository->setSource($this->input->getOption('database'));
+
+        $this->dispatcher->dispatch(new MigrationsInstalling($this->repository));
 
         $this->repository->createRepository();
 
